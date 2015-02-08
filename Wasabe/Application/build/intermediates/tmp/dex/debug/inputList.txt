@@ -1,0 +1,4 @@
+/Users/nicolas/Dropbox/Ensai/S6/PFE/git/Wasabe/Application/build/intermediates/classes/debug
+/Users/nicolas/Dropbox/Ensai/S6/PFE/git/Wasabe/Application/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-30fc24345119041510c750d0e3d1b33addab2cd7.jar
+/Users/nicolas/Dropbox/Ensai/S6/PFE/git/Wasabe/Application/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-4f2cdac61126866bb2092503ed6cf3c7fe0e992b.jar
+/Users/nicolas/Dropbox/Ensai/S6/PFE/git/Wasabe/Application/build/intermediates/pre-dexed/debug/classes-83e9d80fbd990e3f9ec390d172490f15c73d268c.jar
