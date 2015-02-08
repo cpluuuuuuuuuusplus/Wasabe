@@ -23,32 +23,30 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
-import com.example.android.basicnetworking.R;
-import com.example.android.common.logger.Log;
-import com.example.android.common.logger.LogFragment;
-import com.example.android.common.logger.LogWrapper;
-import com.example.android.common.logger.MessageOnlyLogFilter;
+import com.ensai.pfe.wasabe.logger.Log;
+import com.ensai.pfe.wasabe.rest.CallAPI;
+import com.ensai.pfe.wasabe.util.DeviceInfo;
+import com.ensai.pfe.wasabe.R;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Sample application demonstrating how to test whether a device is connected,
  * and if so, whether the connection happens to be wifi or mobile (it could be
  * something else).
- *
+ * <p/>
  * This sample uses the logging framework to display log output in the log
  * fragment (LogFragment).
  */
-public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener{
+public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     public static final String TAG = "Wasabe_main";
 
@@ -57,6 +55,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     public LocationManager locationManager;
     private Double latitude;
     private Double longitude;
+    private Double precision;
+
+
+    private DeviceInfo di;
 
 
 
@@ -72,9 +74,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         setContentView(R.layout.activity_main);
 
 
-
-
-
         // Population de la Spinner des echangeurs
         Spinner spinner = (Spinner) findViewById(R.id.ou_aller);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -84,32 +83,44 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-
+        // Tell the spinner that is is this class that should react when something is selected
+        spinner.setOnItemSelectedListener(this);
 
 
         checkNetworkConnection();
-        locateDevice();
+
+
+
+        // Create DeviceInfo
+
+        createDeviceInfo();
+
+        // send DeviceInfo via REST
+
+        sendDeviceInfo();
+
+        // Get DeviceInfo's ID and attribute it to the device
+
 
     }
 
 
-
-
-
-
-
-
     @Override
     public void onItemSelected(AdapterView<?> parent, View v, int position,
-    long id) {
+                               long id) {
         // L'utilisateur a sélectionné une porte
         Log.i(TAG, "L'utilisateur a sélectionné la porte qui se trouve en position " + position);
+        System.out.println(TAG + "Position dans la Spinner de l'item sélectionné : " + position);
+        System.out.println(TAG + "Localisation détectée : " + latitude + "  " + longitude);
+
 
         // Récuperer la porte selectionnée
+        // dans position
 
 
-       // construire une requete GET à partir de cette porte
-
+        // construire une requete GET à partir de cette porte
+        createDeviceInfo();
+        sendDeviceInfo();
 
 
     }
@@ -122,69 +133,82 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     }
 
 
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.valider_location:
 
-                // get le contenu de la spinner
-                Spinner spinner = (Spinner) findViewById(R.id.ou_aller);
-                spinner.getPrompt();
+    /**
+     * Creates a deviceInfo from the data currently available
+     *
+     * @return current DeviceInfo
+     */
+    private void createDeviceInfo() {
+        locateDevice();
+        Double unixtimestamp = (double) System.currentTimeMillis()/1000;
+        di = new DeviceInfo(unixtimestamp, latitude, longitude, precision, 0.0, 0.0);
+    }
 
-                checkNetworkConnection();
-                return true;
-            // Clear the log view fragment.
-            case R.id.clear_action:
-                return true;
+
+    /**
+     * Envoi de DeviceInfo (contient l'appel asynchrone)
+     */
+    private void sendDeviceInfo() {
+
+        JSONObject jso = createJSONfromDeviceInfo(di);
+
+        String urlString = baseURL + "Whatever";
+
+        TextView progress = (TextView) findViewById(R.id.resultat);
+
+        new CallAPI(progress).execute(urlString);
+
+
+    }
+
+
+    /**
+     *
+     * Creates a JSON object from a DeviceInfo
+     *
+     * @param di deviceinfo
+     * @return JSONObject
+     */
+    private JSONObject createJSONfromDeviceInfo(DeviceInfo di){
+        JSONObject res = new JSONObject();
+
+        try {
+            res.put("temps", di.getTemps());
+            res.put("longitude", di.getLongitude());
+            res.put("latitude", di.getLatitude());
+            res.put("precision", di.getPrecision());
+            res.put("id", di.getId());
+            res.put("destination", di.getDestination());
+
+        }catch(JSONException je){
+            System.out.println(TAG + " Exception JSON while creating JSONized DeviceInfo");
+            je.printStackTrace();
         }
-        return false;
+        return res;
     }
-
-    /**
-     * La méthode Qui enverra la localisation + temps + etc
-     *
-     */
-    private void sendLocationInfo(Location loc){
-
-    }
-
-
-    /**
-     *
-     *
-     */
-
-    private void getDeviceIdentifier(){
-
-
-
-    }
-
-
 
     /**
      * Check whether the device is connected, and if so, whether the connection
      * is wifi or mobile (it could be something else).
      */
     private void checkNetworkConnection() {
-      // BEGIN_INCLUDE(connect)
-      ConnectivityManager connMgr =
-          (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-      NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
-      if (activeInfo != null && activeInfo.isConnected()) {
-          Log.i(TAG, "Connecté à Internet");
-      } else {
-          Log.i(TAG, getString(R.string.no_wifi_or_mobile));
-      }
-      // END_INCLUDE(connect)
+        // BEGIN_INCLUDE(connect)
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+        if (activeInfo != null && activeInfo.isConnected()) {
+            Log.i(TAG, "Connecté à Internet");
+        } else {
+            Log.i(TAG, "Pas connecté à internet");
+        }
+        // END_INCLUDE(connect)
     }
 
 
@@ -204,8 +228,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             if (lastLocation != null) {
                 updateLoc(lastLocation);
             } else {
-                latitude = 48.033333;
-                longitude = -1.750000;
+                latitude = -1000.0;
+                longitude = -1000.0;
+                precision = -1000.0;
             }
         }
     }
@@ -213,6 +238,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     private void updateLoc(Location location) {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
+        precision = Double.parseDouble(location.getAccuracy() + "");
     }
 
 

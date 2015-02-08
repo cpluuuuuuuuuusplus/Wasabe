@@ -15,14 +15,10 @@
   -->
 
 <resources>
-    <string name="test_text">Test</string>
-    <string name="clear_text">Clear</string>
-    <string name="wifi_connection">The active connection is wifi.</string>
-    <string name="mobile_connection">The active connection is mobile.</string>
-    <string name="no_wifi_or_mobile">No wireless or mobile connection.</string>
     <string name="bienvenue_principal">Bienvenue à Wasabe !</string>
     <string name="label_ou_aller">Où voulez-vous aller ?</string>
     <string name="help_saisir_location">Saisir une localisation</string>
     <string name="valider_location">Valider</string>
+    <string name="activite_serveur">Pas encore d\'activité serveur</string>
 
 </resources>
