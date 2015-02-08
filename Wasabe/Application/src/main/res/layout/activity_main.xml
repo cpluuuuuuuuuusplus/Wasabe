@@ -7,7 +7,6 @@
     android:orientation="vertical" >
 
 
-
     <TextView
         android:id="@+id/label_question"
         android:layout_width="wrap_content"
@@ -24,14 +23,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <TextView
-        android:id="@+id/resultat"
+    <Button
+        android:id="@+id/btn_valider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:onClick="validerDestination"
+        android:text="Valider"
+        android:layout_gravity="center_horizontal" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="166dp"
+        android:layout_gravity="center_horizontal" />
+
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chronometer"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/resultat"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingTop="@dimen/margin_huge"
         android:paddingBottom="@dimen/margin_small"
         android:text="@string/activite_serveur"
-        android:textSize="@dimen/margin_large" />
+        android:textSize="12sp"
+        android:enabled="false" />
 
     <!-- <Button
         android:id="@+id/valider_location"

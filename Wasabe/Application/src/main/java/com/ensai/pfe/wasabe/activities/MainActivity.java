@@ -23,20 +23,25 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.view.Menu;
+import android.os.SystemClock;
+import android.util.Log;
+
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.ensai.pfe.wasabe.logger.Log;
 import com.ensai.pfe.wasabe.rest.CallAPI;
 import com.ensai.pfe.wasabe.util.DeviceInfo;
 import com.ensai.pfe.wasabe.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Sample application demonstrating how to test whether a device is connected,
@@ -46,9 +51,9 @@ import org.json.JSONObject;
  * This sample uses the logging framework to display log output in the log
  * fragment (LogFragment).
  */
-public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
+public class MainActivity extends Activity{
 
-    public static final String TAG = "Wasabe_main";
+    public static final String TAG = "MainActivity";
 
 
     // Location related
@@ -56,17 +61,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     private Double latitude;
     private Double longitude;
     private Double precision;
+    private String destination;
 
 
-    private DeviceInfo di;
+    public static DeviceInfo di;
 
+
+    // In order to execute the recurring requests
+    ScheduledThreadPoolExecutor executor_;
 
 
     // Device identifier, filled in by getDeviceIdentifier()
     private Double deviceID = -1.0;
 
-    // The base of the URL to which the device should send information
-    private String baseURL = "http://62.147.137.127:7070/WasabeServer/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,21 +90,46 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
-        // Tell the spinner that is is this class that should react when something is selected
-        spinner.setOnItemSelectedListener(this);
+
+        di = new DeviceInfo();
+
+        executor_ = new ScheduledThreadPoolExecutor(5);
+        executor_.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                Log.i(TAG, "Running a deviceInfo request");
+                // send DeviceInfo via REST
+                // sendDeviceInfo();
+                Chronometer chron = (Chronometer) findViewById(R.id.chronometer);
+                chron.setBase(SystemClock.elapsedRealtime());
+                chron.start();
+            }
+        }, 0, 5, TimeUnit.SECONDS);
+
+/*
+        if(connectedToInternet()) {
 
 
-        checkNetworkConnection();
 
 
 
-        // Create DeviceInfo
 
-        createDeviceInfo();
 
-        // send DeviceInfo via REST
+        }else {
+            // Tell the user that internet is required
+            TextView progress = (TextView) findViewById(R.id.resultat);
+            progress.setText("Erreur : Aucune connexion ! Prière de vous connecter à internet afin d'utiliser cette application.");
 
-        sendDeviceInfo();
+        }
+
+*/
+
+
+
+
+
+
+
 
         // Get DeviceInfo's ID and attribute it to the device
 
@@ -105,67 +137,58 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     }
 
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View v, int position,
-                               long id) {
-        // L'utilisateur a sélectionné une porte
-        Log.i(TAG, "L'utilisateur a sélectionné la porte qui se trouve en position " + position);
-        System.out.println(TAG + "Position dans la Spinner de l'item sélectionné : " + position);
-        System.out.println(TAG + "Localisation détectée : " + latitude + "  " + longitude);
+
+    /**
+     *
+     * GESTION INTERFACE
+     */
+
+    public void validerDestination(View v){
+        Spinner spinner = (Spinner) findViewById(R.id.ou_aller);
+        Log.d(TAG, " Position sélectionnée : " +spinner.getSelectedItem().toString());
+
+        // initialiser Destination
+        di.setDestination(spinner.getSelectedItem().toString());
 
 
-        // Récuperer la porte selectionnée
-        // dans position
-
-
-        // construire une requete GET à partir de cette porte
-        createDeviceInfo();
+        // Appel Async
+        // send DeviceInfo via REST
         sendDeviceInfo();
 
 
     }
 
-    @Override
-    public void onNothingSelected(AdapterView<?> arg0) {
-        // L'utilisateur s'est débrouillé pour ne rien sélectionner
-        // Tres difficile; on ne devrait pas rentrer dans cette méthode
-        Log.e(TAG, "L'utilisateur a sélectionné 'aucune porte'; il ne devrait pas avoir cette option là ! ");
-    }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
 
     /**
-     * Creates a deviceInfo from the data currently available
      *
-     * @return current DeviceInfo
+     * FIN GESTION INTERFACE
      */
-    private void createDeviceInfo() {
-        locateDevice();
-        Double unixtimestamp = (double) System.currentTimeMillis()/1000;
-        di = new DeviceInfo(unixtimestamp, latitude, longitude, precision, 0.0, 0.0);
-    }
 
 
     /**
-     * Envoi de DeviceInfo (contient l'appel asynchrone)
+     *
+     * UTILITAIRES
+     */
+
+
+
+
+    /**
+     *  Envoi de DeviceInfo (contient l'appel asynchrone)
      */
     private void sendDeviceInfo() {
+        locateDevice();
+        Double unixtimestamp = (double) System.currentTimeMillis()/1000;
+        di.setTemps(unixtimestamp);
+
 
         JSONObject jso = createJSONfromDeviceInfo(di);
-
-        String urlString = baseURL + "Whatever";
+        String stringedJsonDeviceInfo = jso.toString();
 
         TextView progress = (TextView) findViewById(R.id.resultat);
-
-        new CallAPI(progress).execute(urlString);
-
-
+        new CallAPI(getApplicationContext(), progress).execute(stringedJsonDeviceInfo);
     }
 
 
@@ -198,15 +221,17 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
      * Check whether the device is connected, and if so, whether the connection
      * is wifi or mobile (it could be something else).
      */
-    private void checkNetworkConnection() {
+    private boolean connectedToInternet() {
         // BEGIN_INCLUDE(connect)
         ConnectivityManager connMgr =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
         if (activeInfo != null && activeInfo.isConnected()) {
             Log.i(TAG, "Connecté à Internet");
+            return true;
         } else {
             Log.i(TAG, "Pas connecté à internet");
+            return false;
         }
         // END_INCLUDE(connect)
     }
@@ -228,17 +253,17 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             if (lastLocation != null) {
                 updateLoc(lastLocation);
             } else {
-                latitude = -1000.0;
-                longitude = -1000.0;
-                precision = -1000.0;
+                di.setLatitude(-1000.0);
+                di.setLongitude(-1000.0);
+                di.setPrecision(-1000.0);
             }
         }
     }
 
     private void updateLoc(Location location) {
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-        precision = Double.parseDouble(location.getAccuracy() + "");
+        di.setLatitude(location.getLatitude());
+        di.setLongitude(location.getLongitude());
+        di.setPrecision(Double.parseDouble(location.getAccuracy() + ""));
     }
 
 

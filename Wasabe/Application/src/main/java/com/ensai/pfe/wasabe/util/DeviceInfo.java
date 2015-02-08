@@ -12,7 +12,7 @@ public class DeviceInfo {
     private Double longitude; // Mesure de longitude
     private Double precision; // Précision de la mesure de longitude/latitude
     private Double id; // Identifiant du device (attribué par le serveur
-    private Double destination; // numéro de porte auquel l'utilisateur veut aller
+    private String destination; // nom de porte auquel l'utilisateur veut aller
 
     // Constructor
     public DeviceInfo(){
@@ -21,10 +21,10 @@ public class DeviceInfo {
         longitude = 0.0;
         precision = 0.0;
         id = 0.0;
-        destination = 0.0;
+        destination = "";
     }
 
-    public DeviceInfo(Double temps, Double latitude, Double longitude, Double precision, Double id, Double destination){
+    public DeviceInfo(Double temps, Double latitude, Double longitude, Double precision, Double id, String destination){
         this.temps = temps;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -81,11 +81,11 @@ public class DeviceInfo {
         this.id = id;
     }
 
-    public Double getDestination() {
+    public String getDestination() {
         return destination;
     }
 
-    public void setDestination(Double destination) {
+    public void setDestination(String destination) {
         this.destination = destination;
     }
 }
