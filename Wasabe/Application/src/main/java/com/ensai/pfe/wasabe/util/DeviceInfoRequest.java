@@ -2,9 +2,14 @@ package com.ensai.pfe.wasabe.util;
 
 import android.content.Context;
 
+import com.ensai.pfe.wasabe.rest.CallAPI;
+
 /**
  *
  * Runs a device info request
+ *
+ *
+ * MAYBE UNUSED
  *
  * Created by nicolas on 09/02/15.
  */
@@ -20,8 +25,6 @@ public class DeviceInfoRequest implements Runnable {
 
 
     public void run(){
-
-
 
     }
 }

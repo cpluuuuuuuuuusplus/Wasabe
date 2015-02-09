@@ -25,21 +25,20 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.ensai.pfe.wasabe.R;
 import com.ensai.pfe.wasabe.rest.CallAPI;
 import com.ensai.pfe.wasabe.util.DeviceInfo;
-import com.ensai.pfe.wasabe.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -51,26 +50,18 @@ import java.util.concurrent.TimeUnit;
  * This sample uses the logging framework to display log output in the log
  * fragment (LogFragment).
  */
-public class MainActivity extends Activity{
+public class MainActivity extends Activity  implements AdapterView.OnItemSelectedListener{
 
     public static final String TAG = "MainActivity";
-
-
+    public static DeviceInfo di;
     // Location related
     public LocationManager locationManager;
+    // In order to execute the recurring requests
+    ScheduledThreadPoolExecutor executor_;
     private Double latitude;
     private Double longitude;
     private Double precision;
     private String destination;
-
-
-    public static DeviceInfo di;
-
-
-    // In order to execute the recurring requests
-    ScheduledThreadPoolExecutor executor_;
-
-
     // Device identifier, filled in by getDeviceIdentifier()
     private Double deviceID = -1.0;
 
@@ -125,27 +116,42 @@ public class MainActivity extends Activity{
 */
 
 
-
-
-
-
-
-
         // Get DeviceInfo's ID and attribute it to the device
 
 
     }
 
 
-
     /**
-     *
      * GESTION INTERFACE
      */
 
-    public void validerDestination(View v){
+
+    /** Required 1/2 for spinner to update values
+     *
+     *
+     * @param arg0
+     * @param arg1
+     * @param arg2
+     * @param arg3
+     */
+    @Override
+    public void onItemSelected(AdapterView<?> arg0, View arg1,
+                               int arg2, long arg3) {
+        // Rien ne se paaaasse
+    }
+    /** Required 1/2 for spinner to update values
+*/
+    @Override
+    public void onNothingSelected(AdapterView<?> arg0) {
+        // Rien ne se paaaasse
+
+    }
+
+
+    public void validerDestination(View v) {
         Spinner spinner = (Spinner) findViewById(R.id.ou_aller);
-        Log.d(TAG, " Position sélectionnée : " +spinner.getSelectedItem().toString());
+        Log.d(TAG, " Position sélectionnée : " + spinner.getSelectedItem().toString());
 
         // initialiser Destination
         di.setDestination(spinner.getSelectedItem().toString());
@@ -157,8 +163,6 @@ public class MainActivity extends Activity{
 
 
     }
-
-
 
 
     /**
@@ -173,14 +177,12 @@ public class MainActivity extends Activity{
      */
 
 
-
-
     /**
-     *  Envoi de DeviceInfo (contient l'appel asynchrone)
+     * Envoi de DeviceInfo (contient l'appel asynchrone)
      */
     private void sendDeviceInfo() {
         locateDevice();
-        Double unixtimestamp = (double) System.currentTimeMillis()/1000;
+        Double unixtimestamp = (double) System.currentTimeMillis() / 1000;
         di.setTemps(unixtimestamp);
 
 
@@ -188,18 +190,18 @@ public class MainActivity extends Activity{
         String stringedJsonDeviceInfo = jso.toString();
 
         TextView progress = (TextView) findViewById(R.id.resultat);
-        new CallAPI(getApplicationContext(), progress).execute(stringedJsonDeviceInfo);
+        new CallAPI(this).execute(stringedJsonDeviceInfo);
+
     }
 
 
     /**
-     *
      * Creates a JSON object from a DeviceInfo
      *
      * @param di deviceinfo
      * @return JSONObject
      */
-    private JSONObject createJSONfromDeviceInfo(DeviceInfo di){
+    private JSONObject createJSONfromDeviceInfo(DeviceInfo di) {
         JSONObject res = new JSONObject();
 
         try {
@@ -210,7 +212,7 @@ public class MainActivity extends Activity{
             res.put("id", di.getId());
             res.put("destination", di.getDestination());
 
-        }catch(JSONException je){
+        } catch (JSONException je) {
             System.out.println(TAG + " Exception JSON while creating JSONized DeviceInfo");
             je.printStackTrace();
         }

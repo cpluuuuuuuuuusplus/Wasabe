@@ -1,9 +1,12 @@
 package com.ensai.pfe.wasabe.rest;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ensai.pfe.wasabe.R;
 import com.ensai.pfe.wasabe.activities.MainActivity;
@@ -17,6 +20,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -33,22 +37,34 @@ import java.net.URL;
 public class CallAPI extends AsyncTask<String, String, String> {
 
 
-    public static final String TAG = "CallAPI";
+   public static final String TAG = "CallAPI";
 
-    private TextView statusTextView;
-    private Context mContext ;
+    // Context needed to update UI thread
+    private MainActivity act = null;
+
+   public CallAPI(MainActivity act){
+       this.act = act;
+   }
 
 
-    public CallAPI(Context ctx, TextView statusTextView){
-        this.mContext = ctx;
-        this.statusTextView = statusTextView;
+
+
+    @Override
+    protected void onPreExecute() {
+
     }
 
 
 
-    protected void onPreExecute() {
-        // Change a string on activity
-        statusTextView.setText("Requete en cours d'envoi ..");
+    @Override
+    protected void onProgressUpdate(String... values) {
+        if (!isCancelled()) {
+            ProgressDialog pd = new ProgressDialog(act);
+            pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            pd.setMessage("Working...");
+            pd.setIndeterminate(true);
+            pd.setCancelable(false);
+        }
     }
 
 
@@ -85,7 +101,7 @@ public class CallAPI extends AsyncTask<String, String, String> {
             System.out.println("Contenu du InputStream : "+resultIS.toString());
 
 
-            // On tente  une conversion en String
+            // On tente une conversion en String
             String resultS = null;
             try{
                 resultS = convertInputStreamToString(resultIS);
@@ -97,8 +113,6 @@ public class CallAPI extends AsyncTask<String, String, String> {
             // vérif
             System.out.println("Contenu du String : "+resultS.toString());
 
-
-
             return resultS;
 
 
@@ -109,25 +123,38 @@ public class CallAPI extends AsyncTask<String, String, String> {
     protected void onPostExecute(String resultS) {
 
         DeviceInfo di = decodeDeviceInfo(resultS);
+        TextView tv = (TextView) act.findViewById(R.id.resultat);
 
-       // statusTextView.setText("Requete reçue (identifiant attribué : "+di.getId()+")");
+        // statusTextView.setText("Requete reçue (identifiant attribué : "+di.getId()+")");
+
+        // C'est un peu bancal mais ça marche
         if(di != null && di.getId() != 0.0){
-            statusTextView.setText("Requête reçue");
-
+            tv.setText("Requête reçue");
             // Update the MainActivity's DeviceInfo
             MainActivity.di.setId(di.getId());
-
-
         }else{
-            statusTextView.setText("Erreur de communication avec le serveur");
-
+            tv.setText("Erreur de communication avec le serveur");
         }
 
 
     }
 
 
+    /***
+     *
+     * UTILITAIRES
+     *
+     *
+     */
 
+
+    /**
+     * Utilitaire
+     *
+     * @param inputStream
+     * @return
+     * @throws IOException
+     */
     private static String convertInputStreamToString(InputStream inputStream) throws IOException{
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line = "";
