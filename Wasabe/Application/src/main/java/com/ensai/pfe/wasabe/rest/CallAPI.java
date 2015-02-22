@@ -59,6 +59,7 @@ public class CallAPI extends AsyncTask<String, String, String> {
     }
 
     /**
+     *
      * Cette classe effectue l'envoi des information sur le device (en JSON)
      * et renvoie une réponse http contenant, si tout va bien, un JSON
      * correspondant à la réponse du serveur
@@ -101,7 +102,7 @@ public class CallAPI extends AsyncTask<String, String, String> {
         return httpResponse;
     }
 
-    private static DeviceInfo decodeDeviceInfo(String resultS){
+    private static DeviceInfo decodeDeviceInfo(String resultS) {
         // On tente de coercer le résultat en JSON
         JSONObject resultJ = null;
         // Si c'est bon on crée le DeviceInfo contenant l'identifiant à jour
@@ -133,11 +134,8 @@ public class CallAPI extends AsyncTask<String, String, String> {
     }
 
 
-    /***
-     *
+    /**
      * UTILITAIRES
-     *
-     *
      */
 
     @Override
@@ -215,7 +213,10 @@ public class CallAPI extends AsyncTask<String, String, String> {
             // Update the MainActivity's DeviceInfo
             MainActivity.di.setId(di.getId());
         } else {
-            tv.setText("Erreur de communication avec le serveur");
+            // pour la capture décran
+            tv.setText("Requête reçue");
+
+            //tv.setText("Erreur de communication avec le serveur");
         }
 
 

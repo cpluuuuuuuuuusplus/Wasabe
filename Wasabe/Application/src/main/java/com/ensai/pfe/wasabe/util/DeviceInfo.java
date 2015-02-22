@@ -22,6 +22,17 @@ public class DeviceInfo {
         destination = "";
     }
 
+    /**
+     * Full constructor for DeviceInfo
+     *
+     * @param temps
+     * @param latitude
+     * @param longitude
+     * @param precision
+     * @param id
+     * @param destination
+     */
+
     public DeviceInfo(Double temps, Double latitude, Double longitude, Double precision, Double id, String destination) {
         this.temps = temps;
         this.latitude = latitude;

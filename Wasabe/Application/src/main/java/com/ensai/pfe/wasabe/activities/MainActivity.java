@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  * This sample uses the logging framework to display log output in the log
  * fragment (LogFragment).
  */
-public class MainActivity extends Activity  implements AdapterView.OnItemSelectedListener{
+public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     public static final String TAG = "MainActivity";
     public static DeviceInfo di;
@@ -123,8 +123,8 @@ public class MainActivity extends Activity  implements AdapterView.OnItemSelecte
      */
 
 
-    /** Required 1/2 for spinner to update values
-     *
+    /**
+     * Required 1/2 for spinner to update values
      *
      * @param arg0
      * @param arg1
@@ -136,8 +136,10 @@ public class MainActivity extends Activity  implements AdapterView.OnItemSelecte
                                int arg2, long arg3) {
         // Rien ne se paaaasse
     }
-    /** Required 1/2 for spinner to update values
-*/
+
+    /**
+     * Required 1/2 for spinner to update values
+     */
     @Override
     public void onNothingSelected(AdapterView<?> arg0) {
         // Rien ne se paaaasse

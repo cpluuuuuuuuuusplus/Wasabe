@@ -32,7 +32,7 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Sample">
 
-    <activity
+        <activity
             android:name="com.ensai.pfe.wasabe.activities.MainActivity"
             android:label="@string/app_name"
             android:uiOptions="splitActionBarWhenNarrow">
