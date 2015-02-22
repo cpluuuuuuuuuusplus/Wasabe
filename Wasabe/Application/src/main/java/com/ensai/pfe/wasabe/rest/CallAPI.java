@@ -116,7 +116,7 @@ public class CallAPI extends AsyncTask<String, String, String> {
             double longitude = resultJ.getDouble("longitude");
             double latitude = resultJ.getDouble("latitude");
             double precision = resultJ.getDouble("precision");
-            double id = resultJ.getDouble("id");
+            String id = resultJ.getString("id");
             String destination = resultJ.getString("destination");
 
             di = new DeviceInfo(temps, longitude, latitude, precision, id, destination);
@@ -208,7 +208,7 @@ public class CallAPI extends AsyncTask<String, String, String> {
         // statusTextView.setText("Requete reçue (identifiant attribué : "+di.getId()+")");
 
         // C'est un peu bancal mais ça marche
-        if (di != null && di.getId() != 0.0) {
+        if (di != null && di.getId() != "noid") {
             tv.setText("Requête reçue");
             // Update the MainActivity's DeviceInfo
             MainActivity.di.setId(di.getId());

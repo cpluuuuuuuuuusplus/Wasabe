@@ -9,7 +9,7 @@ public class DeviceInfo {
     private Double latitude; // Mesure de latitude
     private Double longitude; // Mesure de longitude
     private Double precision; // Précision de la mesure de longitude/latitude
-    private Double id; // Identifiant du device (attribué par le serveur
+    private String id; // Identifiant du device (attribué par le serveur
     private String destination; // nom de porte auquel l'utilisateur veut aller
 
     // Constructor
@@ -18,12 +18,14 @@ public class DeviceInfo {
         latitude = 0.0;
         longitude = 0.0;
         precision = 0.0;
-        id = 0.0;
-        destination = "";
+        id = "noid";
+        destination = "aaa";
     }
 
     /**
      * Full constructor for DeviceInfo
+     *
+     *
      *
      * @param temps
      * @param latitude
@@ -33,7 +35,7 @@ public class DeviceInfo {
      * @param destination
      */
 
-    public DeviceInfo(Double temps, Double latitude, Double longitude, Double precision, Double id, String destination) {
+    public DeviceInfo(Double temps, Double latitude, Double longitude, Double precision, String id, String destination) {
         this.temps = temps;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -82,11 +84,11 @@ public class DeviceInfo {
         this.precision = precision;
     }
 
-    public Double getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Double id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -135,10 +135,13 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     public void onItemSelected(AdapterView<?> arg0, View arg1,
                                int arg2, long arg3) {
         // Rien ne se paaaasse
+        // On pourrait valider directement a la selection d'un item,
+        // ca serait ici qu'il faudrait appeler le code correspondant
+        // a la validation
     }
 
     /**
-     * Required 1/2 for spinner to update values
+     * Required 2/2 for spinner to update values
      */
     @Override
     public void onNothingSelected(AdapterView<?> arg0) {
